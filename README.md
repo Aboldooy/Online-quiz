@@ -1,6 +1,6 @@
-# Django starter
+# Online quiz
 
-Starter project with a custom user model, role-based access (`user` and `admin`), registration, login/logout, and a Bootstrap base template.
+Django starter for an online quiz service. Includes a custom user model, role-based access (`user` and `admin`), registration, login/logout, and a Bootstrap base template.
 
 ## Run locally
 
@@ -15,4 +15,3 @@ Open `http://127.0.0.1:8000/`.
 
 - `user` is assigned to newly registered accounts.
 - `admin` can be assigned in Django Admin. Create an administrator with `python manage.py createsuperuser` and open `/admin/`.
-

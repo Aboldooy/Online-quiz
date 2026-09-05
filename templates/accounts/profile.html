@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Профіль · Django Starter{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0"><div class="card-body p-4">
+  <h1 class="h3">Профіль</h1>
+  <dl class="row mb-0"><dt class="col-sm-3">Ім'я користувача</dt><dd class="col-sm-9">{{ user.username }}</dd><dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ user.email }}</dd><dt class="col-sm-3">Роль</dt><dd class="col-sm-9">{{ user.get_role_display }}</dd></dl>
+</div></div>
+{% endblock %}
+

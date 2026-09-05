@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Головна · Django Starter{% endblock %}
+{% block content %}
+<section class="p-5 bg-white rounded-4 shadow-sm text-center">
+  <h1 class="display-6">Django-проєкт готовий</h1>
+  {% if user.is_authenticated %}
+    <p class="lead mb-0">Ви увійшли як <strong>{{ user.username }}</strong>. Ваша роль: <span class="badge text-bg-primary">{{ user.get_role_display }}</span>.</p>
+  {% else %}
+    <p class="lead">Створіть обліковий запис, щоб почати.</p>
+    <a class="btn btn-primary" href="{% url 'register' %}">Зареєструватися</a>
+  {% endif %}
+</section>
+{% endblock %}
+

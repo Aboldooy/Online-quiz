@@ -1,0 +1,18 @@
+import quizzes.models
+from django.conf import settings
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+    initial = True
+    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL)]
+
+    operations = [
+        migrations.CreateModel(name="Quiz", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("title", models.CharField(max_length=160, verbose_name="Назва")), ("description", models.TextField(blank=True, verbose_name="Опис")), ("invite_code", models.CharField(default=quizzes.models.invitation_code, editable=False, max_length=8, unique=True, verbose_name="Код запрошення")), ("is_published", models.BooleanField(default=True, verbose_name="Опублікована")), ("created_at", models.DateTimeField(auto_now_add=True)), ("author", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="quizzes", to=settings.AUTH_USER_MODEL))], options={"ordering": ["-created_at"]}),
+        migrations.CreateModel(name="Question", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("text", models.TextField(verbose_name="Запитання")), ("kind", models.CharField(choices=[("text", "Текст"), ("image", "Зображення"), ("video", "Відео")], default="text", max_length=10, verbose_name="Тип")), ("media_url", models.URLField(blank=True, verbose_name="Посилання на медіа")), ("time_limit", models.PositiveSmallIntegerField(default=30, verbose_name="Час на відповідь, сек.")), ("position", models.PositiveSmallIntegerField(default=0)), ("quiz", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="questions", to="quizzes.quiz"))], options={"ordering": ["position", "id"]}),
+        migrations.CreateModel(name="Attempt", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("started_at", models.DateTimeField(default=quizzes.models.timezone.now)), ("finished_at", models.DateTimeField(blank=True, null=True)), ("score", models.PositiveIntegerField(default=0)), ("participant", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="quiz_attempts", to=settings.AUTH_USER_MODEL)), ("quiz", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="attempts", to="quizzes.quiz"))], options={"ordering": ["-score", "finished_at", "started_at"]}),
+        migrations.CreateModel(name="Answer", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("text", models.CharField(max_length=400, verbose_name="Варіант відповіді")), ("is_correct", models.BooleanField(default=False, verbose_name="Правильна відповідь")), ("question", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="answers", to="quizzes.question"))]),
+        migrations.CreateModel(name="SubmittedAnswer", fields=[("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")), ("answered_at", models.DateTimeField(auto_now_add=True)), ("is_correct", models.BooleanField(default=False)), ("answer", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="quizzes.answer")), ("attempt", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="submitted_answers", to="quizzes.attempt")), ("question", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="quizzes.question"))]),
+        migrations.AddConstraint(model_name="submittedanswer", constraint=models.UniqueConstraint(fields=("attempt", "question"), name="one_answer_per_question")),
+    ]

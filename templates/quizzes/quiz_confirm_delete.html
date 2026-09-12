@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<div class="card auth-card border-danger shadow-sm"><div class="card-body p-4"><h1 class="h4">Видалити «{{ quiz.title }}»?</h1><p class="text-muted">Буде видалено всі запитання та результати. Цю дію неможливо скасувати.</p><form method="post">{% csrf_token %}<button class="btn btn-danger">Так, видалити</button><a class="btn btn-link" href="{% url 'quiz_detail' quiz.pk %}">Скасувати</a></form></div></div>{% endblock %}

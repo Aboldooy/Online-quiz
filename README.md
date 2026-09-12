@@ -1,17 +1,32 @@
-# Online quiz
+# QuizHub - онлайн-вікторини
 
-Django starter for an online quiz service. Includes a custom user model, role-based access (`user` and `admin`), registration, login/logout, and a Bootstrap base template.
+Готовий Django-проєкт для створення та проходження онлайн-вікторин. Інтерфейс українською мовою, адаптований за допомогою Bootstrap.
 
 ## Run locally
 
 1. Create and activate a virtual environment.
-2. Install dependencies: `pip install -r requirements.txt`
-3. Create the database: `python manage.py migrate`
-4. Start the server: `python manage.py runserver`
+2. Встановіть залежності: `pip install -r requirements.txt`
+3. Створіть базу даних: `python manage.py migrate`
+4. Запустіть сервер: `python manage.py runserver`
 
 Open `http://127.0.0.1:8000/`.
 
-## Roles
+## Реалізовано
+
+- Каталог нових вікторин та пошук за назвою або описом.
+- Реєстрація, вхід, вихід, редагування профілю та ролі `user` / `admin`.
+- Створення вікторин, додавання запитань і варіантів відповідей.
+- Текстові запитання, а також зображення й відео через посилання.
+- Ліміт часу на запитання, таймер у браузері та серверний підрахунок балів.
+- Вхід до вікторини за унікальним кодом-запрошенням.
+- Підсумковий рейтинг, персональна історія завершених спроб.
+- Автор може редагувати або видаляти свою вікторину; адміністратор - будь-яку.
+
+## Ролі
 
 - `user` is assigned to newly registered accounts.
-- `admin` can be assigned in Django Admin. Create an administrator with `python manage.py createsuperuser` and open `/admin/`.
+- `admin` можна призначити в Django Admin. Створіть адміністратора командою `python manage.py createsuperuser` і відкрийте `/admin/`.
+
+## Перевірка
+
+Запустіть `python manage.py test`. Тести перевіряють пошук, проходження з правильним балом та доступи до редагування.

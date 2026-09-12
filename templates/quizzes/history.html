@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}Історія результатів · QuizHub{% endblock %}
+{% block content %}<h1 class="h3 mb-4">Історія результатів</h1><div class="list-group">{% for attempt in attempts %}<a class="list-group-item list-group-item-action d-flex justify-content-between" href="{% url 'attempt_results' attempt.pk %}"><span><strong>{{ attempt.quiz.title }}</strong><br><small class="text-muted">{{ attempt.finished_at|date:"d.m.Y H:i" }}</small></span><span class="badge text-bg-primary align-self-center">{{ attempt.score }} / {{ attempt.quiz.question_count }}</span></a>{% empty %}<div class="list-group-item text-muted">Ви ще не завершили жодної вікторини.</div>{% endfor %}</div>{% endblock %}

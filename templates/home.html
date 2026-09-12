@@ -1,14 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}Головна · Django Starter{% endblock %}
+{% block title %}Онлайн-вікторини · QuizHub{% endblock %}
 {% block content %}
-<section class="p-5 bg-white rounded-4 shadow-sm text-center">
-  <h1 class="display-6">Django-проєкт готовий</h1>
-  {% if user.is_authenticated %}
-    <p class="lead mb-0">Ви увійшли як <strong>{{ user.username }}</strong>. Ваша роль: <span class="badge text-bg-primary">{{ user.get_role_display }}</span>.</p>
-  {% else %}
-    <p class="lead">Створіть обліковий запис, щоб почати.</p>
-    <a class="btn btn-primary" href="{% url 'register' %}">Зареєструватися</a>
-  {% endif %}
+<section class="hero p-4 p-md-5 rounded-4 mb-4">
+  <div class="row align-items-center"><div class="col-md-8"><h1 class="display-6 fw-bold">Вікторини, у які хочеться грати</h1><p class="lead mb-0">Приєднуйтесь за кодом, відповідайте швидше та очолюйте рейтинг.</p></div><div class="col-md-4 text-md-end mt-3 mt-md-0">{% if user.is_staff or user.is_admin_role %}<a class="btn btn-light" href="{% url 'quiz_create' %}">Створити вікторину</a>{% elif user.is_authenticated %}<a class="btn btn-light" href="{% url 'join_quiz' %}">Ввести код</a>{% else %}<a class="btn btn-light" href="{% url 'register' %}">Почати</a>{% endif %}</div></div>
 </section>
 {% endblock %}
 

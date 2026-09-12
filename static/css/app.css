@@ -1,3 +1,27 @@
-.auth-card { max-width: 32rem; margin: 0 auto; }
-.auth-card input { display: block; width: 100%; padding: .375rem .75rem; font-size: 1rem; border: 1px solid #ced4da; border-radius: .375rem; }
+:root { --ink: #eef2ff; --muted: #a9b4d0; --surface: #141a2e; --surface-raised: #1d2642; --line: #33415f; --accent: #7c83ff; --accent-2: #35c7d0; }
+body.bg-light { background: #0b1020 !important; color: var(--ink); }
+.navbar.bg-primary { background: #10182d !important; border-bottom: 1px solid var(--line); }
+.nav-shell { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 58px; }
+.brand-left { grid-column: 1; justify-self: start; }
+.nav-actions { grid-column: 2; justify-content: center; gap: .5rem; }
+.account-actions { grid-column: 3; justify-self: end; }
+.auth-card { max-width: 34rem; margin: 0 auto; }
+.card, .list-group-item { color: var(--ink); background: var(--surface); border-color: var(--line) !important; }
+.card .text-muted, .text-muted, .form-text { color: var(--muted) !important; }
+.hero { color: white; background: radial-gradient(circle at 85% 15%, rgba(53,199,208,.5), transparent 30%), linear-gradient(120deg, #3730a3, #171d48); border: 1px solid #4a4f95; }
+.form-control, .form-select { color: var(--ink); background: #0f1629; border-color: var(--line); min-height: 44px; }
+.form-control::placeholder { color: #7f8aa9; }
+.form-control:focus, .form-select:focus { color: var(--ink); background: #0f1629; border-color: var(--accent); box-shadow: 0 0 0 .2rem rgba(124,131,255,.18); }
+.form-check { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.form-check-input { width: 1.25rem; height: 1.25rem; margin: 0; background-color: #0f1629; border-color: #627197; flex: 0 0 auto; }
+.form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+.form-check-label { cursor: pointer; }
+.question-option { cursor: pointer; color: var(--ink); background: var(--surface-raised); border-color: var(--line) !important; }
+.question-option:hover { border-color: var(--accent) !important; background: #252c50; }
+.badge.text-bg-light { color: #dce0ff !important; background: #2b3558 !important; }
+.btn-primary { background: var(--accent); border-color: var(--accent); }
+.btn-outline-primary { color: #aeb4ff; border-color: #6871cf; }
+.btn-outline-primary:hover { background: var(--accent); border-color: var(--accent); }
+code { color: #8ee7ee; }
+@media (max-width: 768px) { .nav-shell { grid-template-columns: 1fr auto; } .nav-actions { grid-column: 1 / -1; grid-row: 2; flex-wrap: wrap; gap: 0; } .account-actions { grid-column: 2; grid-row: 1; } .nav-actions .nav-link { padding-left: .35rem; padding-right: .35rem; font-size: .85rem; } }
 

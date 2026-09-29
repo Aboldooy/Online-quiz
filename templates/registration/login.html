@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Вхід · Django Starter{% endblock %}
+{% block title %}Вхід · QuizHub{% endblock %}
 {% block content %}
-<div class="card auth-card shadow-sm border-0"><div class="card-body p-4 p-md-5">
-  <h1 class="h3 mb-4">Вхід</h1>
+<div class="form-page"><div class="card auth-card"><div class="card-body">
+  <span class="eyebrow">ПОВЕРНЕННЯ ДО ГРИ</span><h1>Вхід</h1><p class="text-muted">Увійдіть, щоб продовжити свою серію перемог.</p>
   <form method="post" novalidate>{% csrf_token %}
     {% for field in form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}</div>{% endfor %}
     {% for error in form.non_field_errors %}<div class="text-danger small mb-3">{{ error }}</div>{% endfor %}
     <button class="btn btn-primary w-100" type="submit">Увійти</button>
   </form>
-</div></div>
+</div></div></div>
 {% endblock %}
 

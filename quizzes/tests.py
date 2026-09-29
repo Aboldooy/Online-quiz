@@ -16,6 +16,19 @@ class QuizFlowTests(TestCase):
     def test_search_finds_quiz(self):
         self.assertContains(self.client.get(reverse("quiz_list"), {"q": "Столиці"}), "Столиці")
 
+    def test_home_shows_quizzes_and_search(self):
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "Столиці")
+        self.assertContains(response, "Усі вікторини")
+
+    def test_home_shows_only_three_newest_quizzes(self):
+        Quiz.objects.create(title="Друга", author=self.user)
+        Quiz.objects.create(title="Третя", author=self.user)
+        Quiz.objects.create(title="Четверта", author=self.user)
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, "Четверта")
+        self.assertNotContains(response, "Столиці")
+
     def test_correct_answer_adds_point_and_finishes(self):
         self.client.login(username="player", password="safe-password-123")
         self.client.get(reverse("quiz_start", args=[self.quiz.pk]))
@@ -35,9 +48,21 @@ class QuizFlowTests(TestCase):
     def test_regular_user_cannot_create_quiz(self):
         self.client.login(username="player", password="safe-password-123")
         self.assertEqual(self.client.get(reverse("quiz_create")).status_code, 403)
+        response = self.client.post(reverse("quiz_create"), {"title": "Недоступна вікторина"})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Quiz.objects.filter(title="Недоступна вікторина").exists())
 
     def test_admin_can_create_quiz(self):
         self.user.role = "admin"
         self.user.save(update_fields=["role"])
         self.client.login(username="player", password="safe-password-123")
         self.assertEqual(self.client.get(reverse("quiz_create")).status_code, 200)
+
+    def test_quiz_uses_selected_answer_option_count(self):
+        self.user.role = "admin"
+        self.user.save(update_fields=["role"])
+        quiz = Quiz.objects.create(title="П'ять варіантів", author=self.user, answer_option_count=5)
+        self.client.login(username="player", password="safe-password-123")
+        response = self.client.get(reverse("question_create", args=[quiz.pk]))
+        self.assertEqual(len(response.context["formset"].forms), 5)
+        self.assertContains(response, "Додати варіант відповіді")

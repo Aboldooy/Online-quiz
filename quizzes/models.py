@@ -10,15 +10,24 @@ def invitation_code():
 
 
 class Quiz(models.Model):
+    class TimingMode(models.TextChoices):
+        DURATION = "duration", "Загальний час на проходження"
+        SCHEDULED = "scheduled", "Проходження у визначений період"
+
     title = models.CharField("Назва", max_length=160)
     description = models.TextField("Опис", blank=True)
+    answer_option_count = models.PositiveSmallIntegerField("Кількість варіантів відповіді", default=4)
+    timing_mode = models.CharField("Режим часу", max_length=12, choices=TimingMode.choices, default=TimingMode.DURATION)
+    duration_minutes = models.PositiveSmallIntegerField("Час на тест, хв.", default=30)
+    available_from = models.DateTimeField("Початок періоду проходження", null=True, blank=True)
+    available_until = models.DateTimeField("Кінець періоду проходження", null=True, blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quizzes")
     invite_code = models.CharField("Код запрошення", max_length=8, unique=True, default=invitation_code, editable=False)
     is_published = models.BooleanField("Опублікована", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-created_at", "-id"]
 
     def __str__(self):
         return self.title
@@ -38,6 +47,8 @@ class Question(models.Model):
     text = models.TextField("Запитання")
     kind = models.CharField("Тип", max_length=10, choices=Kind.choices, default=Kind.TEXT)
     media_url = models.URLField("Посилання на медіа", blank=True)
+    image = models.ImageField("Зображення", upload_to="quiz_media/images/", blank=True)
+    video = models.FileField("Відео", upload_to="quiz_media/videos/", blank=True)
     time_limit = models.PositiveSmallIntegerField("Час на відповідь, сек.", default=30)
     position = models.PositiveSmallIntegerField(default=0)
 

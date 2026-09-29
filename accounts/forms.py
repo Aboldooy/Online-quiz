@@ -29,9 +29,10 @@ class RegistrationForm(UserCreationForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ("first_name", "last_name", "email")
+        fields = ("avatar", "first_name", "last_name", "email")
         labels = {"first_name": "Ім'я", "last_name": "Прізвище", "email": "Email"}
         widgets = {
+            "avatar": forms.FileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "first_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ваше ім'я"}),
             "last_name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ваше прізвище"}),
             "email": forms.EmailInput(attrs={"class": "form-control", "placeholder": "you@example.com"}),

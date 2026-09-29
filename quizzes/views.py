@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -5,7 +7,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import AnswerFormSet, JoinQuizForm, QuestionForm, QuizForm
+from .forms import JoinQuizForm, QuestionForm, QuizForm, answer_formset
 from .models import Attempt, Question, Quiz, SubmittedAnswer
 
 
@@ -19,14 +21,15 @@ def is_quiz_admin(user):
 
 def quiz_list(request):
     query = request.GET.get("q", "").strip()
-    quizzes = Quiz.objects.filter(is_published=True).select_related("author").annotate(answer_count=Count("attempts"))
+    quizzes = Quiz.objects.filter(is_published=True).select_related("author").annotate(answer_count=Count("attempts")).order_by("-created_at", "-id")
     if query:
         quizzes = quizzes.filter(Q(title__icontains=query) | Q(description__icontains=query))
     return render(request, "quizzes/list.html", {"quizzes": quizzes, "query": query})
 
 
 def home(request):
-    return render(request, "home.html")
+    quizzes = Quiz.objects.filter(is_published=True).select_related("author").order_by("-created_at", "-id")[:3]
+    return render(request, "home.html", {"quizzes": quizzes})
 
 
 def quiz_detail(request, pk):
@@ -80,8 +83,8 @@ def question_create(request, quiz_pk):
     quiz = get_object_or_404(Quiz, pk=quiz_pk)
     if not can_manage(request.user, quiz):
         raise PermissionDenied
-    question_form = QuestionForm(request.POST or None)
-    formset = AnswerFormSet(request.POST or None, prefix="answers")
+    question_form = QuestionForm(request.POST or None, request.FILES or None)
+    formset = answer_formset(data=request.POST or None, instance=Question(quiz=quiz), extra=quiz.answer_option_count)
     if request.method == "POST" and question_form.is_valid() and formset.is_valid():
         answers = [form for form in formset if form.cleaned_data and not form.cleaned_data.get("DELETE")]
         if len(answers) < 2 or not any(form.cleaned_data.get("is_correct") for form in answers):
@@ -111,6 +114,14 @@ def join_quiz(request):
 @login_required
 def quiz_start(request, pk):
     quiz = get_object_or_404(Quiz, pk=pk, is_published=True)
+    now = timezone.now()
+    if quiz.timing_mode == Quiz.TimingMode.SCHEDULED:
+        if now < quiz.available_from:
+            messages.error(request, f"Вікторина буде доступна {timezone.localtime(quiz.available_from):%d.%m.%Y о %H:%M}.")
+            return redirect("quiz_detail", pk=quiz.pk)
+        if now >= quiz.available_until:
+            messages.error(request, "Період проходження цієї вікторини завершився.")
+            return redirect("quiz_detail", pk=quiz.pk)
     if not quiz.questions.exists():
         messages.error(request, "У цій вікторині ще немає запитань.")
         return redirect("quiz_detail", pk=quiz.pk)
@@ -125,6 +136,15 @@ def attempt_question(request, attempt_pk, number):
     attempt = get_object_or_404(Attempt.objects.select_related("quiz"), pk=attempt_pk, participant=request.user)
     if attempt.is_finished:
         return redirect("attempt_results", attempt_pk=attempt.pk)
+    if attempt.quiz.timing_mode == Quiz.TimingMode.SCHEDULED:
+        deadline = attempt.quiz.available_until
+    else:
+        deadline = attempt.started_at + timedelta(minutes=attempt.quiz.duration_minutes)
+    now = timezone.now()
+    if now >= deadline:
+        attempt.finished_at = deadline
+        attempt.save(update_fields=["finished_at"])
+        return redirect("attempt_results", attempt_pk=attempt.pk)
     questions = list(attempt.quiz.questions.prefetch_related("answers"))
     if number > len(questions):
         attempt.finished_at = timezone.now()
@@ -134,17 +154,20 @@ def attempt_question(request, attempt_pk, number):
     existing = SubmittedAnswer.objects.filter(attempt=attempt, question=question).first()
     if existing:
         return redirect("attempt_question", attempt_pk=attempt.pk, number=number + 1)
-    elapsed = (timezone.now() - attempt.started_at).total_seconds() - sum(q.time_limit for q in questions[: number - 1])
-    expired = elapsed > question.time_limit
     if request.method == "POST":
+        if timezone.now() >= deadline:
+            attempt.finished_at = deadline
+            attempt.save(update_fields=["finished_at"])
+            return redirect("attempt_results", attempt_pk=attempt.pk)
         chosen = question.answers.filter(pk=request.POST.get("answer")).first()
-        correct = bool(chosen and chosen.is_correct and not expired)
+        correct = bool(chosen and chosen.is_correct)
         SubmittedAnswer.objects.create(attempt=attempt, question=question, answer=chosen, is_correct=correct)
         if correct:
             attempt.score += 1
             attempt.save(update_fields=["score"])
         return redirect("attempt_question", attempt_pk=attempt.pk, number=number + 1)
-    return render(request, "quizzes/play.html", {"attempt": attempt, "question": question, "number": number, "total": len(questions), "seconds_left": max(0, int(question.time_limit - elapsed)), "expired": expired})
+    seconds_left = max(0, int((deadline - now).total_seconds()))
+    return render(request, "quizzes/play.html", {"attempt": attempt, "question": question, "number": number, "total": len(questions), "seconds_left": seconds_left})
 
 
 @login_required

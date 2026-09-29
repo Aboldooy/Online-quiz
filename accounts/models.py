@@ -8,6 +8,7 @@ class CustomUser(AbstractUser):
         ADMIN = "admin", "Admin"
 
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.USER)
+    avatar = models.ImageField("Аватар", upload_to="avatars/", blank=True)
 
     @property
     def is_admin_role(self):
